@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import axios from "axios";
 import { GET_SERVICE_DATA, ORDERS_ROUTES } from "../../utils/constants";
@@ -16,7 +16,8 @@ interface OrderDetails {
   notes?: string | null;
 }
 
-const OrderConfirmation: React.FC = () => {
+// Move the main logic into a separate component to use Suspense
+const OrderConfirmationContent: React.FC = () => {
   const searchParams = useSearchParams();
   const orderId = searchParams.get("orderId");
   const serviceId = searchParams.get("serviceId");
@@ -146,6 +147,15 @@ const OrderConfirmation: React.FC = () => {
         </div>
       </div>
     </div>
+  );
+};
+
+// Wrap the main component in a Suspense boundary
+const OrderConfirmation: React.FC = () => {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <OrderConfirmationContent />
+    </Suspense>
   );
 };
 

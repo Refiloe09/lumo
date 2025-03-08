@@ -5,13 +5,17 @@ import { LRUCache } from "lru-cache";
 
 const cache = new LRUCache<string, any>({ max: 100, ttl: 1000 * 60 * 60 }); // Cache for 1 hour
 
+interface Context {
+  params: Promise<{ clerkUserId: string }>;
+}
+
 // Handler for GET requests to fetch Clerk user details
 export async function GET(
   request: Request,
-  { params }: { params: { clerkUserId: string } }
+  context: Context
 ) {
   try {
-    const { clerkUserId } = params;
+    const { clerkUserId } = await context.params;
 
     // Check cache first
     const cachedUser = cache.get(clerkUserId);

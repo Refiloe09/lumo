@@ -1,13 +1,13 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, Suspense } from "react";
 import axios from "axios";
 import { CREATE_ORDER } from "../../utils/constants";
 import { useSearchParams } from "next/navigation";
 import CheckoutForm from "../components/CheckoutForm";
 
-const Checkout: React.FC = () => {
-
+// Wrap the main component in a Suspense boundary
+const CheckoutContent: React.FC = () => {
   const searchParams = useSearchParams();
   const serviceId = searchParams.get("serviceId");
   const [orderId, setOrderId] = useState<string | null>(null);
@@ -72,6 +72,15 @@ const Checkout: React.FC = () => {
         )}
       </div>
     </div>
+  );
+};
+
+// Main Checkout component with Suspense boundary
+const Checkout: React.FC = () => {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <CheckoutContent />
+    </Suspense>
   );
 };
 
