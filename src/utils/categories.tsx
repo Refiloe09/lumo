@@ -1,9 +1,16 @@
+import { JSX } from "react";
 import { 
     FaBalanceScale, FaMoneyBillWave, FaChartLine, FaBullhorn, FaLaptopCode, 
     FaUsers, FaIndustry, FaFileContract, FaHandshake, FaTruck
   } from "react-icons/fa";
+
+  interface Category {
+    label: string;
+    icon: JSX.Element; // Using JSX.Element for React icons
+    subcategories: string[];
+  }
   
-  const categories = [
+  const categories: Category[] = [
     {
       label: "Legal & Compliance",
       icon: <FaBalanceScale />,
@@ -114,4 +121,5 @@ import {
   ];
   
   export default categories;
+  export type { Category };
   

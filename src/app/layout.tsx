@@ -4,6 +4,7 @@ import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
+import ClientWrapper from "./components/ClientWrapper";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -28,15 +29,17 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <ClerkProvider
           publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}
         >
+          
+          <ClientWrapper>
           <Navbar />
-          <main className="min-h-screen">{children}</main>
-          <Footer />
+            <main className="min-h-screen">{children}</main>
+            <Footer />
+          </ClientWrapper>
+          
         </ClerkProvider>
       </body>
     </html>

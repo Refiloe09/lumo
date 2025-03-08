@@ -2,10 +2,11 @@
 import Image from "next/image";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import SearchBox from "../ServiceSearch";
 
 const Hero = () => {
   return (
-    <section className="relative w-full h-[80vh] flex items-center justify-center bg-lumo-light">
+    <section className="relative w-full h-[90vh] flex items-center justify-center bg-lumo-light">
       {/* Background Image */}
       <div className="absolute inset-0 w-full h-full">
         <Image
@@ -38,7 +39,7 @@ const Hero = () => {
         >
           Find the right services to grow your business—from legal assistance to marketing & tech solutions.
         </motion.p>
-
+        <SearchBox />
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}

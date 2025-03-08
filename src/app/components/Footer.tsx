@@ -25,36 +25,36 @@ const Footer = () => {
       title: "Business Support",
       icon: <FaBriefcase className="text-lumo-primary" />,
       links: [
-        { name: "Legal & Compliance", link: "/search?category=legal" },
-        { name: "Financial Services", link: "/search?category=finance" },
-        { name: "Business Development", link: "/search?category=business" },
+        { name: "Legal & Compliance", link: "/search?query=legal" },
+        { name: "Financial Services", link: "/search?query=finance" },
+        { name: "Business Development", link: "/search?query=business" },
       ],
     },
     {
       title: "Growth & Marketing",
       icon: <FaChartLine className="text-lumo-primary" />,
       links: [
-        { name: "Branding & Identity", link: "/search?category=branding" },
-        { name: "Sales Strategy", link: "/search?category=sales" },
-        { name: "Market Research", link: "/search?category=market-research" },
+        { name: "Branding & Identity", link: "/search?query=branding" },
+        { name: "Sales Strategy", link: "/search?query=sales" },
+        { name: "Market Research", link: "/search?query=market-research" },
       ],
     },
     {
       title: "Licensing & Compliance",
       icon: <FaShieldAlt className="text-lumo-primary" />,
       links: [
-        { name: "BEE Certification", link: "/search?category=bee" },
-        { name: "SARS Registration", link: "/search?category=sars" },
-        { name: "Permits & Licensing", link: "/search?category=permits" },
+        { name: "BEE Certification", link: "/search?query=bee" },
+        { name: "SARS Registration", link: "/search?query=sars" },
+        { name: "Permits & Licensing", link: "/search?query=permits" },
       ],
     },
     {
       title: "Funding & Investment",
       icon: <FaHandshake className="text-lumo-primary" />,
       links: [
-        { name: "Investor Pitch Decks", link: "/search?category=pitch-decks" },
-        { name: "Grant & Funding Support", link: "/search?category=grants" },
-        { name: "Venture Capital Networking", link: "/search?category=vc" },
+        { name: "Investor Pitch Decks", link: "/search?query=pitch-decks" },
+        { name: "Grant & Funding Support", link: "/search?query=grants" },
+        { name: "Venture Capital Networking", link: "/search?query=vc" },
       ],
     },
   ];

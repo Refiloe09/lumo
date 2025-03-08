@@ -1,23 +1,41 @@
+"use client";
+
 import { useStateProvider } from "../../context/StateContext";
 import { reducerCases } from "../../context/constants";
 import { ADD_REVIEW } from "@/utils/constants";
 import axios from "axios";
-import { useRouter } from "next/router";
+import { useParams } from "next/navigation";
 import React, { useState } from "react";
 import { FaStar } from "react-icons/fa";
 
-function AddReview() {
-  const [{}, dispatch] = useStateProvider();
-  const [data, setData] = useState({ reviewText: "", rating: 0 });
-  const router = useRouter();
-  const { serviceId } = router.query;
+interface ReviewData {
+  reviewText: string;
+  rating: number;
+}
+
+const AddReview: React.FC = () => {
+  const [{}, dispatch] = useStateProvider(); // Destructure to avoid unused variable warning
+  const [data, setData] = useState<ReviewData>({ reviewText: "", rating: 0 });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const { serviceId } = useParams();
+
   const addReview = async () => {
+    if (!data.reviewText.trim() || data.rating === 0) {
+      setError("Please provide a review and rating.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    setError(null);
+
     try {
       const response = await axios.post(
         `${ADD_REVIEW}/${serviceId}`,
         { ...data },
         { withCredentials: true }
       );
+
       if (response.status === 201) {
         setData({ reviewText: "", rating: 0 });
         dispatch({
@@ -26,44 +44,64 @@ function AddReview() {
         });
       }
     } catch (err) {
-      console.error(err);
+      console.error("Error adding review:", err);
+      setError("Failed to submit review. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
+
   return (
-    <div className="mb-10">
-      <h3 className="text-2xl my-5 font-normal   text-[#404145]">
-        Post A Review
+    <div className="mb-12 bg-white rounded-lg shadow-md p-6">
+      <h3 className="text-xl md:text-2xl font-semibold text-gray-800 mb-6">
+        Share Your Review
       </h3>
 
-      <div className="flex  flex-col  items-start justify-start gap-3">
-        <textarea
-          name="reviewText"
-          id="reviewText"
-          onChange={(e) => setData({ ...data, reviewText: e.target.value })}
-          value={data.reviewText}
-          className="block p-2.5 w-4/6 text-sm text-gray-900 bg-gray-50 rounded border border-gray-300 focus:ring-blue-500 focus:border-blue-500 "
-          placeholder="Add Review"
-        ></textarea>
-        <div className="flex gap-1">
+      <div className="space-y-6">
+        {/* Review Textarea */}
+        <div className="relative">
+          <textarea
+            name="reviewText"
+            id="reviewText"
+            onChange={(e) => setData({ ...data, reviewText: e.target.value })}
+            value={data.reviewText}
+            className="w-full p-3 text-sm text-gray-900 bg-gray-50 rounded-md border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 resize-y min-h-[100px]"
+            placeholder="Write your review here..."
+            disabled={isSubmitting}
+          />
+        </div>
+
+        {/* Star Rating */}
+        <div className="flex items-center gap-1">
           {[1, 2, 3, 4, 5].map((num) => (
             <FaStar
               key={num}
-              className={`cursor-pointer ${
+              className={`h-6 w-6 cursor-pointer transition-colors duration-200 ${
                 data.rating >= num ? "text-yellow-400" : "text-gray-300"
-              }`}
-              onClick={() => setData({ ...data, rating: num })}
+              } ${isSubmitting ? "cursor-not-allowed opacity-50" : "hover:text-yellow-300"}`}
+              onClick={() => !isSubmitting && setData({ ...data, rating: num })}
             />
           ))}
         </div>
+
+        {/* Error Message */}
+        {error && (
+          <div className="text-sm text-red-500 bg-red-50 p-2 rounded-md">
+            {error}
+          </div>
+        )}
+
+        {/* Submit Button */}
         <button
-          className="flex items-center bg-[#1E3A45] text-white py-2 justify-center text-md relative rounded px-5"
+          className="w-full sm:w-auto bg-teal-600 hover:bg-teal-700 text-white py-2 px-6 rounded-md font-medium text-sm md:text-md transition-all duration-200 disabled:bg-teal-400 disabled:cursor-not-allowed"
           onClick={addReview}
+          disabled={isSubmitting}
         >
-          Add Review
+          {isSubmitting ? "Submitting..." : "Add Review"}
         </button>
       </div>
     </div>
   );
-}
+};
 
 export default AddReview;

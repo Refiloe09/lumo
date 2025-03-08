@@ -1,177 +1,177 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+"use client";
+
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
 import AddReview from "../../components/Services/AddReview";
 import Reviews from "../../components/Services/Reviews";
 import { FaStar } from "react-icons/fa";
 import { useStateProvider } from "../../context/StateContext";
-import { HOST } from "@/utils/constants";
+import { IMAGES_URL } from "@/utils/constants";
 
-function Details() {
-  const [{ serviceData, hasOrdered }] = useStateProvider();
-  const [currentImage, setCurrentImage] = useState("");
+interface Service {
+  id: string;
+  images: string[];
+  createdBy: {
+    clerkUserId: string;
+    email: string;
+    profileImage?: string | null;
+    username?: string;
+    phone?: string | null;
+  };
+  title: string;
+  reviews: { rating: number; id?: string; reviewText?: string; reviewer?: any }[] | number;
+  price: number;
+  category: string;
+  deliveryTime: number;
+  shortDesc: string;
+  description: string;
+  totalReviews?: number;
+}
 
-  useEffect(() => {
-    if (serviceData) {
-      setCurrentImage(serviceData.images[0]);
-    }
-  }, [serviceData]);
-
+const Details: React.FC<{ serviceData: Service }> = ({ serviceData }) => {
+  const [{ hasOrdered }] = useStateProvider();
+  const [currentImage, setCurrentImage] = useState<string | null>(null);
   const [averageRatings, setAverageRatings] = useState("0");
+
   useEffect(() => {
-    if (serviceData && serviceData.reviews.length) {
-      let avgRating = 0;
-      serviceData.reviews.forEach((review: { rating: number }) => (avgRating += review.rating));
-      setAverageRatings((avgRating / serviceData.reviews.length).toFixed(1));
+    console.log("Details component - serviceData:", serviceData);
+    if (serviceData?.images?.length > 0) {
+      setCurrentImage(serviceData.images[0]);
+      console.log("Set currentImage:", serviceData.images[0]);
     }
   }, [serviceData]);
+
+  useEffect(() => {
+    if (serviceData?.reviews && Array.isArray(serviceData.reviews) && serviceData.reviews.length) {
+      const avgRating = serviceData.reviews.reduce((acc: number, review: { rating: number }) => acc + review.rating, 0) / serviceData.reviews.length;
+      setAverageRatings(avgRating.toFixed(1));
+    }
+  }, [serviceData]);
+
+  if (!serviceData) return null;
+
+  const usernameOrEmail = serviceData.createdBy.username || serviceData.createdBy.email.split("@")[0];
+  const initial = (serviceData.createdBy.username || serviceData.createdBy.email)[0].toUpperCase();
 
   return (
-    <>
-      {serviceData && currentImage !== "" && (
-        <div className="col-span-2 flex flex-col gap-3">
-          <h2 className="text-2xl font-bold text-[#404145] mb-1">
-            {serviceData.title}
-          </h2>
-          <div className="flex items-center gap-2">
-            <div>
-              {serviceData.createdBy.profileImage ? (
+    <div className="w-full max-w-4xl mx-auto space-y-8">
+      {/* Service Title */}
+      <h2 className="text-2xl md:text-3xl font-bold text-gray-900">{serviceData.title}</h2>
+
+      {/* Seller Info */}
+      <div className="flex items-center gap-4 border-t pt-6">
+        {serviceData.createdBy.profileImage ? (
+          <Image
+            src={serviceData.createdBy.profileImage}
+            alt="Seller profile"
+            height={48}
+            width={48}
+            className="rounded-full shadow-md"
+          />
+        ) : (
+          <div className="bg-purple-600 h-12 w-12 flex items-center justify-center rounded-full shadow-md">
+            <span className="text-xl text-white font-semibold">{initial}</span>
+          </div>
+        )}
+        <div>
+          <h4 className="text-lg font-semibold text-gray-800">{usernameOrEmail}</h4>
+          <h6 className="text-sm text-gray-500">@{usernameOrEmail}</h6>
+        </div>
+      </div>
+
+      {/* Image Gallery */}
+      {currentImage ? (
+        <div className="space-y-4">
+          <div className="relative overflow-hidden rounded-lg shadow-md">
+            <Image
+              src={`${IMAGES_URL}/${currentImage}`}
+              alt={`${serviceData.title} preview`}
+              height={400}
+              width={800}
+              className="w-full h-auto object-cover transition-transform duration-300 hover:scale-105"
+            />
+          </div>
+          {serviceData.images.length > 1 && (
+            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
+              {serviceData.images.map((image) => (
                 <Image
-                  src={HOST + "/" + serviceData.createdBy.profileImage}
-                  alt="profile"
-                  height={30}
-                  width={30}
-                  className="rounded-full"
+                  key={image}
+                  src={`${IMAGES_URL}/${image}`}
+                  alt="Thumbnail"
+                  height={80}
+                  width={80}
+                  onClick={() => setCurrentImage(image)}
+                  className={`cursor-pointer rounded-md transition-all duration-300 ${
+                    currentImage === image ? "border-2 border-blue-500 opacity-100" : "opacity-70 hover:opacity-100"
+                  }`}
                 />
-              ) : (
-                <div className="bg-purple-500 h-10 w-10 flex items-center justify-center rounded-full relative">
-                  <span className="text-xl text-white">
-                    {serviceData.createdBy.email[0].toUpperCase()}
-                  </span>
-                </div>
-              )}
+              ))}
             </div>
-            <div className="flex gap-2 items-center">
-              <h4 className="text-[#27272a] font-bold">
-                {serviceData.createdBy.fullName}
-              </h4>
-              <h6 className="text-[#74767e]">@{serviceData.createdBy.username}</h6>
+          )}
+        </div>
+      ) : (
+        <div className="text-center py-8 text-gray-500 bg-gray-50 rounded-lg">No images available</div>
+      )}
+
+      {/* Service Description */}
+      <section className="space-y-4">
+        <h3 className="text-2xl font-semibold text-gray-900">About This Service</h3>
+        <div className="prose prose-sm md:prose-base text-gray-700">
+          <p>{serviceData.description || "No description available"}</p>
+        </div>
+      </section>
+
+      {/* Seller Details */}
+      <section className="space-y-4">
+        <h3 className="text-2xl font-semibold text-gray-900">About the Seller</h3>
+        <div className="flex flex-col sm:flex-row gap-6">
+          {serviceData.createdBy.profileImage ? (
+            <Image
+              src={serviceData.createdBy.profileImage}
+              alt="Seller profile"
+              height={100}
+              width={100}
+              className="rounded-full shadow-md"
+            />
+          ) : (
+            <div className="bg-purple-600 h-24 w-24 flex items-center justify-center rounded-full shadow-md">
+              <span className="text-3xl text-white font-semibold">{initial}</span>
             </div>
-            <div className="flex items-center gap-1">
-              <div className="flex">
+          )}
+          <div className="space-y-3 flex-1">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+              <h4 className="text-lg font-medium text-gray-800">{usernameOrEmail}</h4>
+              <span className="text-gray-500">@{usernameOrEmail}</span>
+            </div>
+            <div className="prose prose-sm text-gray-700">
+              <p>{serviceData.description || "No description available"}</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="flex text-yellow-400">
                 {[1, 2, 3, 4, 5].map((star) => (
                   <FaStar
                     key={star}
-                    className={`cursor-pointer ${
-                      Math.ceil(Number(averageRatings)) >= star
-                        ? "text-yellow-400"
-                        : "text-gray-300"
-                    }`}
+                    className={`h-5 w-5 ${Math.ceil(Number(averageRatings)) >= star ? "text-yellow-400" : "text-gray-300"}`}
                   />
                 ))}
               </div>
-              <span className="text-yellow-500">{averageRatings}</span>
-              <span className="text-[#27272a]">({serviceData.reviews.length})</span>
+              <span className="text-gray-800 font-medium">{averageRatings}</span>
+              <span className="text-gray-500">
+                ({Array.isArray(serviceData.reviews) ? serviceData.reviews.length : serviceData.totalReviews || 0})
+              </span>
             </div>
           </div>
-          <div className="flex flex-col gap-4">
-            <div className="max-h-[1000px] max-w-[1000px] overflow-hidden">
-              <Image
-                src={HOST + "/uploads/" + currentImage}
-                alt="service"
-                height={1000}
-                width={1000}
-                className="hover:scale-110 transition-all duration-500"
-              />
-            </div>
-            <div className="flex gap-4 flex-wrap">
-              {serviceData.images.length > 1 &&
-                serviceData.images.map((image: string) => (
-                  <Image
-                    src={HOST + "/uploads/" + image}
-                    alt="service"
-                    height={100}
-                    width={100}
-                    key={image}
-                    onClick={() => setCurrentImage(image)}
-                    className={`${
-                      currentImage === image ? "" : "blur-sm"
-                    } cursor-pointer transition-all duration-500`}
-                  />
-                ))}
-            </div>
-          </div>
-          <div>
-            <h3 className="text-3xl my-5 font-medium text-[#404145]">
-              About this service
-            </h3>
-            <div>
-              <p>{serviceData.description}</p>
-            </div>
-          </div>
-          {/* About the seller */}
-          <div className="">
-            <h3 className="text-3xl my-5 font-medium text-[#404145]">
-              About the Seller
-            </h3>
-            <div className="flex gap-4">
-              <div>
-                {serviceData.createdBy.profileImage ? (
-                  <Image
-                    src={HOST + "/" + serviceData.createdBy.profileImage}
-                    alt="profile"
-                    height={120}
-                    width={120}
-                    className="rounded-full"
-                  />
-                ) : (
-                  <div className="bg-purple-500 h-10 w-10 flex items-center justify-center rounded-full relative">
-                    <span className="text-xl text-white">
-                      {serviceData.createdBy.email[0].toUpperCase()}
-                    </span>
-                  </div>
-                )}
-              </div>
-              <div className="flex flex-col gap-1">
-                <div className="flex  gap-2 items-center">
-                  <h4 className="font-medium text-lg">
-                    {serviceData.createdBy.fullName}
-                  </h4>
-                  <span className="text-[#74767e]">
-                    @{serviceData.createdBy.username}
-                  </span>
-                </div>
-                <div>
-                  <p>{serviceData.createdBy.description}</p>
-                </div>
-                <div className="flex items-center gap-1">
-                  <div className="flex text-yellow-500">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <FaStar
-                        key={star}
-                        className={`cursor-pointer ${
-                          Math.ceil(serviceData.averageRating) >= star
-                            ? "text-yellow-400"
-                            : "text-gray-300"
-                        }`}
-                      />
-                    ))}
-                  </div>
-                  <span className="text-yellow-500">
-                    {serviceData.averageRating}
-                  </span>
-                  <span className="text-[#74767e]">
-                    ({serviceData.totalReviews})
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-          <Reviews />
-          {hasOrdered && <AddReview />}
         </div>
-      )}
-    </>
+      </section>
+
+      {/* Reviews Section */}
+      <section className="space-y-6">
+        <Reviews />
+        {hasOrdered && <AddReview />}
+      </section>
+    </div>
   );
-}
+};
 
 export default Details;

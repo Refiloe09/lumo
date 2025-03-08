@@ -8,8 +8,7 @@ export const ORDERS_ROUTES = `${API_URL}/orders`;
 export const MESSAGES_ROUTES = `${API_URL}/messages`;
 export const DASHBOARD_DATA_ROUTES = `${API_URL}/dashboard`;
 
-
-
+export const SYNC_USER_ROUTE = `${AUTH_ROUTES}/sync-user`;
 export const ADD_SERVICE_ROUTE = `${SERVICE_ROUTES}/add`;
 export const GET_USER_SERVICES_ROUTE = `${SERVICE_ROUTES}/get-user-services`;
 export const GET_SERVICE_DATA = `${SERVICE_ROUTES}/get-service-data`;
@@ -19,7 +18,7 @@ export const CHECK_USER_ORDERED_SERVICE_ROUTE = `${SERVICE_ROUTES}/check-service
 export const ADD_REVIEW = `${SERVICE_ROUTES}/add-review`;
 
 export const CREATE_ORDER = `${ORDERS_ROUTES}/create`;
-export const ORDER_SUCCESS_ROUTE = `${ORDERS_ROUTES}/success`;
+export const CONFIRM_ORDER = `${ORDERS_ROUTES}/confirm`; // New constant
 export const GET_BUYER_ORDERS_ROUTE = `${ORDERS_ROUTES}/get-buyer-orders`;
 export const GET_SELLER_ORDERS_ROUTE = `${ORDERS_ROUTES}/get-seller-orders`;
 

@@ -8,9 +8,7 @@ import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { useAuth } from "@clerk/nextjs";
 
-
 function CreateServices() {
-  
   const router = useRouter();
   const { getToken } = useAuth();
   const inputClassName =
@@ -21,6 +19,7 @@ function CreateServices() {
   const [data, setData] = useState({
     title: "",
     category: "",
+    subcategory: "",
     description: "",
     time: 0,
     revisions: 0,
@@ -28,22 +27,31 @@ function CreateServices() {
     price: 0,
     shortDesc: "",
   });
-const removeFeature = (index: number) => {
+  const [availableSubcategories, setAvailableSubcategories] = useState<string[]>([]);
+
+  const removeFeature = (index: number) => {
     const clonedFeatures = [...features];
     clonedFeatures.splice(index, 1);
     setfeatures(clonedFeatures);
-};
+  };
 
-interface ChangeEvent {
+  interface ChangeEvent {
     target: {
-        name: string;
-        value: string | number;
+      name: string;
+      value: string | number;
     };
-}
+  }
 
-const handleChange = (e: ChangeEvent) => {
-    setData({ ...data, [e.target.name]: e.target.value });
-};
+  const handleChange = (e: ChangeEvent) => {
+    const { name, value } = e.target;
+    setData({ ...data, [name]: value });
+
+    if (name === "category") {
+      const selectedCategory = categories.find((cat) => cat.label === value);
+      setAvailableSubcategories(selectedCategory ? selectedCategory.subcategories : []);
+      setData((prevData) => ({ ...prevData, subcategory: "" })); // Reset subcategory when category changes
+    }
+  };
 
   const addFeature = () => {
     if (data.feature) {
@@ -51,33 +59,59 @@ const handleChange = (e: ChangeEvent) => {
       setData({ ...data, feature: "" });
     }
   };
+
   const addService = async () => {
-    const { category, description, price, revisions, time, title, shortDesc } =
-      data;
+    console.log("🟢 Button clicked: Starting service creation...");
+    const { category, subcategory, description, price, revisions, time, title, shortDesc } = data;
+
+    // 🔍 Log required fields before making request
+    if (!category) console.error("❌ Category is missing");
+    if (!subcategory) console.error("❌ Subcategory is missing");
+    if (!description) console.error("❌ Description is missing");
+    if (!title) console.error("❌ Title is missing");
+    if (!features.length) console.error("❌ Features are missing");
+    if (!files.length) console.error("❌ Images are missing");
+    if (price <= 0) console.error("❌ Price must be greater than 0");
+    if (!shortDesc.length) console.error("❌ Short description is missing");
+    if (revisions <= 0) console.error("❌ Revisions must be greater than 0");
+    if (time <= 0) console.error("❌ Delivery time must be greater than 0");
+
+    // 🔥 Check if any required field is missing before making the request
     if (
-      category &&
-      description &&
-      title &&
-      features.length &&
-      files.length &&
-      price > 0 &&
-      shortDesc.length &&
-      revisions > 0 &&
-      time > 0
+      !category || !subcategory || !description || !title || !features.length || !files.length || price <= 0 ||
+      !shortDesc.length || revisions <= 0 || time <= 0
     ) {
+      console.error("❌ Cannot submit form: Missing required fields");
+      return;
+    }
+
+    try {
+      console.log("📸 Preparing FormData...");
       const formData = new FormData();
       files.forEach((file) => formData.append("images", file));
+
       const serviceData = {
         title,
         description,
         category,
+        subcategory,
         features,
         price,
         revisions,
         time,
         shortDesc,
       };
+
+      console.log("🟠 Fetching Clerk Auth Token...");
       const token = await getToken();
+      if (!token) {
+        console.error("❌ Failed to retrieve Clerk auth token!");
+        return;
+      }
+
+      console.log("🚀 Sending API request to:", ADD_SERVICE_ROUTE);
+      console.log("📦 Payload:", serviceData);
+
       const response = await axios.post(ADD_SERVICE_ROUTE, formData, {
         withCredentials: true,
         headers: {
@@ -86,11 +120,20 @@ const handleChange = (e: ChangeEvent) => {
         },
         params: serviceData,
       });
+
+      console.log("✅ Service created successfully!", response.data);
       if (response.status === 201) {
         router.push("/seller/services");
       }
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        console.error("❌ Error in API request:", error.response?.data || error.message);
+      } else {
+        console.error("❌ Error in API request:", error);
+      }
     }
   };
+
   return (
     <div className="min-h-[80vh] my-10 mt-0 px-32 ">
       <h1 className="text-6xl text-gray-900 mb-5">Create a new Service</h1>
@@ -125,6 +168,7 @@ const handleChange = (e: ChangeEvent) => {
               onChange={handleChange}
               defaultValue="Choose a Category"
             >
+              <option value="">Choose a Category</option>
               {categories.map(({ label }) => (
                 <option key={label} value={label}>
                   {label}
@@ -133,6 +177,27 @@ const handleChange = (e: ChangeEvent) => {
             </select>
           </div>
         </div>
+        {data.category && (
+          <div>
+            <label htmlFor="subcategories" className={labelClassName}>
+              Select a Subcategory
+            </label>
+            <select
+              id="subcategories"
+              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-4"
+              name="subcategory"
+              onChange={handleChange}
+              value={data.subcategory}
+            >
+              <option value="">Choose a Subcategory</option>
+              {availableSubcategories.map((subcategory) => (
+                <option key={subcategory} value={subcategory}>
+                  {subcategory}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
         <div>
           <label htmlFor="description" className={labelClassName}>
             Service Description
@@ -242,7 +307,7 @@ const handleChange = (e: ChangeEvent) => {
           </div>
           <div>
             <label htmlFor="price" className={labelClassName}>
-              service Price ( $ )
+              service Price ( R )
             </label>
             <input
               type="number"
