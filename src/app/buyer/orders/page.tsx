@@ -40,7 +40,7 @@ function Orders() {
   const [error, setError] = useState<string | null>(null);
   const { getToken } = useAuth();
   const { user } = useUser();
-  const userId = user?.id;
+  const clerkUserId = user?.id;
 
   useEffect(() => {
     const getOrders = async () => {
@@ -48,7 +48,7 @@ function Orders() {
         setIsLoading(true);
         setError(null);
         const token = await getToken();
-        const { data: { orders: ordersData } } = await axios.get(`${GET_BUYER_ORDERS_ROUTE}?clerkUserId=${userId}`, { withCredentials: true, headers: { Authorization: `Bearer ${token}` } });
+        const { data: { orders: ordersData } } = await axios.get(GET_BUYER_ORDERS_ROUTE, { withCredentials: true, headers: { Authorization: `Bearer ${token}` }, params: { clerkUserId } });
         console.log(ordersData);
         setOrders(ordersData || []);
       } catch (err) {
@@ -59,7 +59,7 @@ function Orders() {
       }
     };
      getOrders();
-  }, [getToken, userId]);
+  }, [getToken, clerkUserId]);
 
   return (
     <section
