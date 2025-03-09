@@ -6,11 +6,12 @@ import { ADD_SERVICE_ROUTE } from "@/utils/constants";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
-import { useAuth } from "@clerk/nextjs";
+import { useAuth, useUser } from "@clerk/nextjs";
 
 function CreateServices() {
   const router = useRouter();
   const { getToken } = useAuth();
+  const { user } = useUser();
   const inputClassName =
     "block p-4 w-full text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50  focus:ring-blue-500 focus:border-blue-500";
   const labelClassName = "mb-2 text-lg font-medium text-gray-900  ";
@@ -26,6 +27,7 @@ function CreateServices() {
     feature: "",
     price: 0,
     shortDesc: "",
+    userId: user?.id || "",
   });
   const [availableSubcategories, setAvailableSubcategories] = useState<string[]>([]);
 
@@ -100,6 +102,7 @@ function CreateServices() {
         revisions,
         time,
         shortDesc,
+        userId: user?.id || "",
       };
 
       console.log("🟠 Fetching Clerk Auth Token...");

@@ -10,7 +10,7 @@ import {
 import axios, { AxiosError } from "axios";
 import { useRouter, useParams } from "next/navigation";
 import React, { useEffect, useState, ChangeEvent } from "react";
-import { useAuth } from "@clerk/nextjs";
+import { useAuth, useUser } from "@clerk/nextjs";
 
 // Define interfaces for data types
 interface Service {
@@ -42,6 +42,7 @@ const EditService = () => {
   const router = useRouter();
   const { serviceId } = useParams(); // Dynamic route param: [serviceId]
   const { getToken } = useAuth();
+  const { user } = useUser();
 
   // State management
   const [formData, setFormData] = useState<FormData>({
@@ -185,6 +186,7 @@ const EditService = () => {
         revisions,
         time,
         shortDesc,
+        userId: user?.id,
       };
 
       const response = await axios.put(

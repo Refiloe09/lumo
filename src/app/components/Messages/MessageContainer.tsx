@@ -52,7 +52,8 @@ function MessageContainer() {
           withCredentials: true,
           headers: {
             Authorization: `Bearer ${token}` // Optional: Add token if your API requires it
-          }
+          },
+          params: { userId: user?.id, orderId: orderId},
         });
         setMessages(dataMessages || []);
         setRecipentId(recipent);
