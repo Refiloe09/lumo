@@ -9,6 +9,14 @@ const nextConfig: NextConfig = {
         hostname: "localhost",
         port: "8747",
       },
+      {
+        protocol: "https",
+        hostname: "res.cloudinary.com",
+      },
+      {
+        protocol: "https",
+        hostname: "placehold.co",
+      },
     ],
   },
 };

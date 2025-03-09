@@ -56,12 +56,16 @@ function SearchGridItem({ service }: { service: Service }) {
       onClick={() => router.push(`/service/${service.id}`)}
     >
       <div className="relative w-full h-48 sm:h-40 overflow-hidden rounded-t-xl group">
-        <Image
+      <Image
           src={imageSrc}
           alt={service.title}
-          fill
+          width={300} // Static width to match max-w-[300px]
+          height={192} // Static height to match h-48 (192px)
           className="object-cover transition-transform duration-300 group-hover:scale-105"
-          onError={(e) => (e.currentTarget.src = PLACEHOLDER_IMAGE)}
+          onError={(e) => {
+            console.log("Image load failed, falling back to placeholder:", imageSrc);
+            e.currentTarget.src = PLACEHOLDER_IMAGE;
+          }}
         />
         {/* Overlay on hover */}
         <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-opacity duration-300" />

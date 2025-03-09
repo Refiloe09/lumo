@@ -88,29 +88,35 @@ const Details: React.FC<{ serviceData: Service }> = ({ serviceData }) => {
       {serviceData.images && serviceData.images.length > 0 ? (
         <div className="space-y-4">
           <div className="relative overflow-hidden rounded-lg shadow-md">
-            <Image
-              src={currentImage || PLACEHOLDER_IMAGE} // Fallback to placeholder
+          <Image
+              src={currentImage || PLACEHOLDER_IMAGE}
               alt={`${serviceData.title} preview`}
-              height={400}
-              width={800}
+              width={800} // Static width
+              height={400} // Static height
               className="w-full h-auto object-cover transition-transform duration-300 hover:scale-105"
-              onError={(e) => (e.currentTarget.src = PLACEHOLDER_IMAGE)} // Fallback if Cloudinary URL fails
+              onError={(e) => {
+                console.log("Main image load failed, falling back to placeholder:", currentImage);
+                e.currentTarget.src = PLACEHOLDER_IMAGE;
+              }}
             />
           </div>
           {serviceData.images.length > 1 && (
             <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
               {serviceData.images.map((image) => (
                 <Image
-                  key={image.publicId} // Use publicId as a unique key
-                  src={image.url} // Use the Cloudinary URL directly
+                  key={image.publicId}
+                  src={image.url}
                   alt="Thumbnail"
-                  height={80}
-                  width={80}
+                  width={80} // Static width
+                  height={80} // Static height
                   onClick={() => setCurrentImage(image.url)}
                   className={`cursor-pointer rounded-md transition-all duration-300 ${
                     currentImage === image.url ? "border-2 border-blue-500 opacity-100" : "opacity-70 hover:opacity-100"
                   }`}
-                  onError={(e) => (e.currentTarget.src = "https://placehold.co/80x80.png")} // Smaller placeholder for thumbnails
+                  onError={(e) => {
+                    console.log("Thumbnail load failed, falling back to placeholder:", image.url);
+                    e.currentTarget.src = "https://placehold.co/80x80.png";
+                  }}
                 />
               ))}
             </div>
