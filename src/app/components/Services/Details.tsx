@@ -7,11 +7,13 @@ import AddReview from "../../components/Services/AddReview";
 import Reviews from "../../components/Services/Reviews";
 import { FaStar } from "react-icons/fa";
 import { useStateProvider } from "../../context/StateContext";
-import { IMAGES_URL } from "@/utils/constants";
+
+// Define a constant for the placeholder image
+const PLACEHOLDER_IMAGE = "https://placehold.co/800x400.png"; // Matches the 800x400 size used in the main image
 
 interface Service {
   id: string;
-  images: string[];
+  images: { url: string; publicId: string }[];
   createdBy: {
     clerkUserId: string;
     email: string;
@@ -37,8 +39,10 @@ const Details: React.FC<{ serviceData: Service }> = ({ serviceData }) => {
   useEffect(() => {
     console.log("Details component - serviceData:", serviceData);
     if (serviceData?.images?.length > 0) {
-      setCurrentImage(serviceData.images[0]);
-      console.log("Set currentImage:", serviceData.images[0]);
+      setCurrentImage(serviceData.images[0].url); // Use the `url` field directly
+      console.log("Set currentImage:", serviceData.images[0].url);
+    } else {
+      setCurrentImage(PLACEHOLDER_IMAGE); // Fallback to placeholder if no images
     }
   }, [serviceData]);
 
@@ -81,37 +85,48 @@ const Details: React.FC<{ serviceData: Service }> = ({ serviceData }) => {
       </div>
 
       {/* Image Gallery */}
-      {currentImage ? (
+      {serviceData.images && serviceData.images.length > 0 ? (
         <div className="space-y-4">
           <div className="relative overflow-hidden rounded-lg shadow-md">
             <Image
-              src={`${IMAGES_URL}/${currentImage}`}
+              src={currentImage || PLACEHOLDER_IMAGE} // Fallback to placeholder
               alt={`${serviceData.title} preview`}
               height={400}
               width={800}
               className="w-full h-auto object-cover transition-transform duration-300 hover:scale-105"
+              onError={(e) => (e.currentTarget.src = PLACEHOLDER_IMAGE)} // Fallback if Cloudinary URL fails
             />
           </div>
           {serviceData.images.length > 1 && (
             <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
               {serviceData.images.map((image) => (
                 <Image
-                  key={image}
-                  src={`${IMAGES_URL}/${image}`}
+                  key={image.publicId} // Use publicId as a unique key
+                  src={image.url} // Use the Cloudinary URL directly
                   alt="Thumbnail"
                   height={80}
                   width={80}
-                  onClick={() => setCurrentImage(image)}
+                  onClick={() => setCurrentImage(image.url)}
                   className={`cursor-pointer rounded-md transition-all duration-300 ${
-                    currentImage === image ? "border-2 border-blue-500 opacity-100" : "opacity-70 hover:opacity-100"
+                    currentImage === image.url ? "border-2 border-blue-500 opacity-100" : "opacity-70 hover:opacity-100"
                   }`}
+                  onError={(e) => (e.currentTarget.src = "https://placehold.co/80x80.png")} // Smaller placeholder for thumbnails
                 />
               ))}
             </div>
           )}
         </div>
       ) : (
-        <div className="text-center py-8 text-gray-500 bg-gray-50 rounded-lg">No images available</div>
+        <div className="text-center py-8 text-gray-500 bg-gray-50 rounded-lg">
+          <Image
+            src={PLACEHOLDER_IMAGE}
+            alt="No images available"
+            height={400}
+            width={800}
+            className="w-full h-auto object-cover rounded-lg"
+          />
+          <p className="mt-4">No images available</p>
+        </div>
       )}
 
       {/* Service Description */}

@@ -16,7 +16,7 @@ import { useAuth } from "@clerk/nextjs";
 
 interface Service {
   id: string;
-  images: string[];
+  images: {url: string; publicId: string}[];
   createdBy: {
     clerkUserId: string;
     email: string;

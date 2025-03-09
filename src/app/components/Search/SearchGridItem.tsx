@@ -1,6 +1,6 @@
 "use client";
 
-import { IMAGES_URL } from "@/utils/constants";
+import { PLACEHOLDER_IMAGE } from "@/utils/constants";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import React from "react";
@@ -8,7 +8,7 @@ import { FaStar, FaEnvelope, FaPhone } from "react-icons/fa";
 
 interface Service {
   id: string;
-  images: string[];
+  images: {url: string; publicId: string}[];
   createdBy: {
     clerkUserId: string;
     profileImage?: string;
@@ -47,7 +47,9 @@ function SearchGridItem({ service }: { service: Service }) {
   const initial = service.createdBy.username
     ? service.createdBy.username[0].toUpperCase()
     : service.createdBy.email[0].toUpperCase();
-
+  // Use the first image or placeholder if none
+  const imageSrc = service.images.length > 0 ? service.images[0].url : PLACEHOLDER_IMAGE;
+  
   return (
     <div
       className="w-full max-w-[300px] sm:max-w-[250px] flex flex-col bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 cursor-pointer border border-gray-100"
@@ -55,11 +57,11 @@ function SearchGridItem({ service }: { service: Service }) {
     >
       <div className="relative w-full h-48 sm:h-40 overflow-hidden rounded-t-xl group">
         <Image
-          src={`${IMAGES_URL}/${service.images[0] || "default.jpg"}`}
+          src={imageSrc}
           alt={service.title}
           fill
           className="object-cover transition-transform duration-300 group-hover:scale-105"
-          onError={(e) => (e.currentTarget.src = "/default-image.jpg")}
+          onError={(e) => (e.currentTarget.src = PLACEHOLDER_IMAGE)}
         />
         {/* Overlay on hover */}
         <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-opacity duration-300" />
