@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import { CONFIRM_ORDER } from "../../utils/constants";
+import { useAuth } from "@clerk/nextjs";
 
 interface CheckoutFormProps {
   orderId: string;
@@ -25,6 +26,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ orderId, serviceId }) => {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { getToken } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -38,10 +40,11 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ orderId, serviceId }) => {
     setError(null);
 
     try {
+      const token = await getToken();
       await axios.put(
         `${CONFIRM_ORDER}/${orderId}`,
         { ...formData },
-        { withCredentials: true }
+        { withCredentials: true, headers: { Authorization: `Bearer ${token}` } }
       );
       router.push(`/order-confirmation?orderId=${orderId}&serviceId=${serviceId}`);
     } catch (err) {

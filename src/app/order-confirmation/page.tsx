@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import axios from "axios";
 import { GET_SERVICE_DATA, ORDERS_ROUTES } from "../../utils/constants";
 import Link from "next/link";
+import { useAuth } from "@clerk/nextjs";
 
 interface OrderDetails {
   orderId: string;
@@ -24,6 +25,7 @@ const OrderConfirmationContent: React.FC = () => {
   const [orderDetails, setOrderDetails] = useState<OrderDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { getToken } = useAuth();
 
   useEffect(() => {
     const fetchOrderDetails = async () => {
@@ -37,12 +39,15 @@ const OrderConfirmationContent: React.FC = () => {
       setError(null);
 
       try {
+        const token = await getToken();
         const [serviceResponse, orderResponse] = await Promise.all([
           axios.get(`${GET_SERVICE_DATA}/${serviceId}`, {
             withCredentials: true,
+            headers: { Authorization: `Bearer ${token}` },
           }),
           axios.get(`${ORDERS_ROUTES}/${orderId}`, {
             withCredentials: true,
+            headers: { Authorization: `Bearer ${token}` },
           }),
         ]);
 
@@ -67,7 +72,7 @@ const OrderConfirmationContent: React.FC = () => {
     };
 
     fetchOrderDetails();
-  }, [orderId, serviceId]);
+  }, [orderId, serviceId, getToken]);
 
   if (loading) {
     return (

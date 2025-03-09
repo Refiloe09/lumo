@@ -4,6 +4,7 @@ import { GET_USER_SERVICES_ROUTE } from "@/utils/constants";
 import axios from "axios";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
+import { useAuth } from "@clerk/nextjs";
 
 // Loading skeleton component
 const LoadingSkeleton = () => (
@@ -24,16 +25,19 @@ function ServicesDashboard() {
   const [services, setServices] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { getToken } = useAuth();
 
   useEffect(() => {
     const fetchUserServices = async () => {
       try {
         setIsLoading(true);
         setError(null);
+        const token = await getToken();
         const {
           data: { services: servicesData },
         } = await axios.get(GET_USER_SERVICES_ROUTE, {
           withCredentials: true,
+          headers: { Authorization: `Bearer ${token}` },
         });
         setServices(servicesData || []);
       } catch (err) {
@@ -44,7 +48,7 @@ function ServicesDashboard() {
       }
     };
     fetchUserServices();
-  }, []);
+  }, [getToken]);
 
   return (
     <section

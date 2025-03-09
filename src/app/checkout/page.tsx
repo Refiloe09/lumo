@@ -5,6 +5,7 @@ import axios from "axios";
 import { CREATE_ORDER } from "../../utils/constants";
 import { useSearchParams } from "next/navigation";
 import CheckoutForm from "../components/CheckoutForm";
+import { useAuth } from "@clerk/nextjs";
 
 // Wrap the main component in a Suspense boundary
 const CheckoutContent: React.FC = () => {
@@ -13,6 +14,7 @@ const CheckoutContent: React.FC = () => {
   const [orderId, setOrderId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { getToken } = useAuth();
 
   useEffect(() => {
     const createOrder = async () => {
@@ -22,10 +24,11 @@ const CheckoutContent: React.FC = () => {
       setError(null);
 
       try {
+        const token = await getToken();
         const { data } = await axios.post(
           CREATE_ORDER,
           { serviceId },
-          { withCredentials: true }
+          { withCredentials: true, headers: { Authorization: `Bearer ${token}` } }
         );
         setOrderId(data.orderId);
       } catch (err) {
@@ -37,7 +40,7 @@ const CheckoutContent: React.FC = () => {
     };
 
     createOrder();
-  }, [serviceId]);
+  }, [serviceId, getToken]);
 
   if (loading) {
     return (

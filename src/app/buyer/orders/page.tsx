@@ -4,6 +4,7 @@ import { GET_BUYER_ORDERS_ROUTE } from "../../../utils/constants";
 import axios from "axios";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
+import { useAuth } from "@clerk/nextjs";
 
 // Loading skeleton component
 const LoadingSkeleton = () => (
@@ -37,14 +38,15 @@ function Orders() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
+  const { getToken } = useAuth();
 
   useEffect(() => {
     const getOrders = async () => {
       try {
         setIsLoading(true);
         setError(null);
-        const { data: { orders: ordersData } } = await axios.get(GET_BUYER_ORDERS_ROUTE, { withCredentials: true });
+        const token = await getToken();
+        const { data: { orders: ordersData } } = await axios.get(GET_BUYER_ORDERS_ROUTE, { withCredentials: true, headers: { Authorization: `Bearer ${token}` } });
         console.log(ordersData);
         setOrders(ordersData || []);
       } catch (err) {
@@ -55,7 +57,7 @@ function Orders() {
       }
     };
      getOrders();
-  }, []);
+  }, [getToken]);
 
   return (
     <section

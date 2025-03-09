@@ -7,6 +7,7 @@ import axios from "axios";
 import { useParams } from "next/navigation";
 import React, { useState } from "react";
 import { FaStar } from "react-icons/fa";
+import { useAuth } from "@clerk/nextjs";
 
 interface ReviewData {
   reviewText: string;
@@ -19,6 +20,7 @@ const AddReview: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { serviceId } = useParams();
+  const { getToken } = useAuth();
 
   const addReview = async () => {
     if (!data.reviewText.trim() || data.rating === 0) {
@@ -30,10 +32,11 @@ const AddReview: React.FC = () => {
     setError(null);
 
     try {
+      const token = await getToken();
       const response = await axios.post(
         `${ADD_REVIEW}/${serviceId}`,
         { ...data },
-        { withCredentials: true }
+        { withCredentials: true, headers: { Authorization: `Bearer ${token}` } }
       );
 
       if (response.status === 201) {
